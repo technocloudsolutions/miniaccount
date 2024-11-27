@@ -35,9 +35,6 @@ type Expense = {
   currency: string;
 };
 
-// Type for the expense data when adding/editing (without id and metadata)
-type ExpenseInput = Omit<Expense, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'type' | 'currency'>;
-
 export default function ExpensesPage() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -91,7 +88,7 @@ export default function ExpensesPage() {
       expensesData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       setExpenses(expensesData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching expenses:', err);
       setError('Failed to load expenses data');
     } finally {
@@ -103,7 +100,7 @@ export default function ExpensesPage() {
     if (user) {
       fetchExpenses();
     }
-  }, [user]);
+  }, [user, fetchExpenses]);
 
   const handleAddExpense = async (expenseData: Omit<Expense, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'type'>) => {
     if (!user) {

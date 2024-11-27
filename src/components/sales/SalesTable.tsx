@@ -1,9 +1,8 @@
 'use client';
 
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import type { Sale } from '@/types';
 import { useState } from 'react';
 import { formatCurrency } from '@/utils/format';
+import { Sale } from '@/types';
 
 interface SalesTableProps {
   sales: Sale[];
@@ -58,22 +57,6 @@ export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: Sales
   const totalPages = Math.ceil(sortedSales.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedSales = sortedSales.slice(startIndex, startIndex + itemsPerPage);
-
-  const handleSort = (field: keyof Sale) => {
-    setSortDirection(currentDirection => 
-      sortField === field && currentDirection === 'desc' ? 'asc' : 'desc'
-    );
-    setSortField(field);
-  };
-
-  const SortIndicator = ({ field }: { field: keyof Sale }) => {
-    if (sortField !== field) return null;
-    return (
-      <span className="ml-1">
-        {sortDirection === 'desc' ? '↓' : '↑'}
-      </span>
-    );
-  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -144,13 +127,13 @@ export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: Sales
           <input
             type="date"
             value={dateRange.start}
-            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+            onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
             className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
           <input
             type="date"
             value={dateRange.end}
-            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+            onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
             className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
         </div>

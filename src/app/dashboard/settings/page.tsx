@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { PlusIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, CurrencyDollarIcon, TagIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, CurrencyDollarIcon, TagIcon } from '@heroicons/react/24/outline';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ interface ExpenseCategory {
 interface TabProps {
   id: string;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const bankCategories = [
@@ -190,7 +190,7 @@ export default function SettingsPage() {
       const updatedCategories = await getSupplierCategories();
       setSupplierCategories(updatedCategories);
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error adding supplier category:', err);
       setError(err instanceof Error ? err.message : 'Failed to add supplier category');
     } finally {

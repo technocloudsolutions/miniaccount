@@ -45,47 +45,6 @@ export function ReportFilter() {
   })
   const { user } = useAuth()
 
-  const handleTimeframeChange = useCallback(async (newTimeframe: ReportTimeframe) => {
-    setTimeframe(newTimeframe)
-    let dateRange;
-    
-    if (newTimeframe === 'custom') {
-      dateRange = {
-        startDate: date.from || new Date(),
-        endDate: date.to || new Date()
-      }
-    } else {
-      dateRange = getDateRangeFromTimeframe(newTimeframe)
-    }
-
-    currentFilter = {
-      timeframe: newTimeframe,
-      dateRange
-    }
-    await handleGenerateReport()
-  }, [date])
-
-  const handleDateRangeChange = async (newDate: DateRange | undefined) => {
-    if (!newDate) return;
-    
-    setDate({
-      from: newDate.from,
-      to: newDate.to
-    });
-    
-    if (newDate.from && newDate.to) {
-      currentFilter = {
-        timeframe: 'custom',
-        dateRange: {
-          startDate: newDate.from,
-          endDate: newDate.to
-        }
-      }
-      setTimeframe('custom')
-      await handleGenerateReport()
-    }
-  }
-
   const handleGenerateReport = useCallback(async () => {
     if (!user) return
 
@@ -109,12 +68,53 @@ export function ReportFilter() {
         detail: reports 
       })
       window.dispatchEvent(event)
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating reports:', error)
     } finally {
       setLoading(false)
     }
   }, [user])
+
+  const handleTimeframeChange = useCallback(async (newTimeframe: ReportTimeframe) => {
+    setTimeframe(newTimeframe)
+    let dateRange;
+    
+    if (newTimeframe === 'custom') {
+      dateRange = {
+        startDate: date.from || new Date(),
+        endDate: date.to || new Date()
+      }
+    } else {
+      dateRange = getDateRangeFromTimeframe(newTimeframe)
+    }
+
+    currentFilter = {
+      timeframe: newTimeframe,
+      dateRange
+    }
+    await handleGenerateReport()
+  }, [date, handleGenerateReport])
+
+  const handleDateRangeChange = async (newDate: DateRange | undefined) => {
+    if (!newDate) return;
+    
+    setDate({
+      from: newDate.from,
+      to: newDate.to
+    });
+    
+    if (newDate.from && newDate.to) {
+      currentFilter = {
+        timeframe: 'custom',
+        dateRange: {
+          startDate: newDate.from,
+          endDate: newDate.to
+        }
+      }
+      setTimeframe('custom')
+      await handleGenerateReport()
+    }
+  }
 
   const getDateRangeFromTimeframe = (timeframe: ReportTimeframe) => {
     const endDate = new Date()
