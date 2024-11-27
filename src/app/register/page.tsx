@@ -1,7 +1,7 @@
 import Image from "next/image";
-import LoginForm from '@/components/auth/LoginForm';
+import RegisterForm from '@/components/auth/RegisterForm';
 
-export default function Home() {
+export default function Register() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-primary-950 dark:to-secondary-950">
       <div className="container mx-auto min-h-screen flex">
@@ -12,25 +12,25 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-white">AccountEase</h1>
             </div>
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
-              Welcome back to your business hub
+              Start your business journey
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Manage your business finances with ease. Track sales, expenses, and generate reports in one place.
+              Join thousands of businesses managing their finances efficiently with AccountEase.
             </p>
             <div className="grid grid-cols-2 gap-4 pt-6">
               <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-primary-600 dark:text-primary-400">Easy Tracking</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Monitor your business performance in real-time</p>
+                <h3 className="font-semibold text-primary-600 dark:text-primary-400">Quick Setup</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Get started in minutes with our easy setup</p>
               </div>
               <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-primary-600 dark:text-primary-400">Smart Reports</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Get insights with detailed analytics</p>
+                <h3 className="font-semibold text-primary-600 dark:text-primary-400">Secure Data</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Your business data is always protected</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right side - Login Form */}
+        {/* Right side - Registration Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
           <div className="w-full max-w-md space-y-8 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-primary-100 dark:border-primary-900">
             <div className="text-center space-y-2">
@@ -40,23 +40,23 @@ export default function Home() {
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Sign in to your account
+                Create your account
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Enter your credentials to access your account
+                Fill in your details to get started with AccountEase
               </p>
             </div>
 
-            <LoginForm />
+            <RegisterForm />
 
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Don't have an account?{' '}
+                Already have an account?{' '}
                 <a
-                  href="/register"
+                  href="/"
                   className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
                 >
-                  Create an account
+                  Sign in
                 </a>
               </p>
             </div>
@@ -65,4 +65,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+} 
