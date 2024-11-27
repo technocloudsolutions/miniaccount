@@ -5,8 +5,6 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/components/providers/AuthProvider';
 import {
-  CurrencyDollarIcon,
-  ReceiptRefundIcon,
   ArrowTrendingUpIcon,
   ArrowUpIcon,
   ArrowDownIcon,
@@ -68,7 +66,7 @@ export default function Dashboard() {
 
         const querySnapshot = await getDocs(q);
         const transactions: Transaction[] = [];
-        let totalStats = {
+        const totalStats = {
           totalSales: 0,
           totalExpenses: 0,
           todaySales: 0,
@@ -144,10 +142,10 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Today's Stats */}
+        {/* Today&apos;s Stats */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Today's Summary</h3>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Today&apos;s Summary</h3>
             <CalendarIcon className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-3">

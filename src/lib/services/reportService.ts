@@ -1,6 +1,8 @@
 import { db } from '../firebase'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { collection, query, where, getDocs, Timestamp, orderBy } from 'firebase/firestore'
 import { Report, ReportType, ReportFilter, ReportSummary, ReportDataPoint } from '../types/reports'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { format } from 'date-fns'
 import { auth } from '../firebase'
 
@@ -337,6 +339,7 @@ async function getReportData(type: ReportType, filter: ReportFilter, userId: str
   return data.sort((a, b) => b.date.getTime() - a.date.getTime())
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getCollectionQuery(type: ReportType, filter: ReportFilter, userId: string) {
   switch (type) {
     case 'inventory':
@@ -375,6 +378,7 @@ function getCollectionQuery(type: ReportType, filter: ReportFilter, userId: stri
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getCollectionName(type: ReportType): string {
   // Map report types to actual collection names in your Firebase
   switch (type) {

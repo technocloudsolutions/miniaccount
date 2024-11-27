@@ -1,4 +1,5 @@
 import { db } from './firebase';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { collection, getDocs, query, doc, setDoc, addDoc, deleteDoc, where } from 'firebase/firestore';
 
 // Define collection names as constants

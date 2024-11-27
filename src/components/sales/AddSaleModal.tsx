@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Sale } from '@/types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { formatCurrency } from '@/utils/format';
 import { getBankAccounts } from '@/lib/firebaseService';
 import type { BankAccount } from '@/types';

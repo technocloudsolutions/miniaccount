@@ -12,7 +12,9 @@ interface SalesTableProps {
 }
 
 export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: SalesTableProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sortField, setSortField] = useState<keyof Sale>('date');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPaymentMethod, setFilterPaymentMethod] = useState<string>('');

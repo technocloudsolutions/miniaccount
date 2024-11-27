@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { format } from "date-fns"
 import {
   Dialog,
@@ -32,11 +32,26 @@ export function ReportViewer({ isOpen, onClose, reportType, title }: ReportViewe
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const loadReport = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const newReport = await generateReport(reportType, getCurrentFilter())
+      console.log('Loaded report:', newReport)
+      setReport(newReport)
+    } catch (error) {
+      console.error('Error loading report:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load report')
+    } finally {
+      setLoading(false)
+    }
+  }, [reportType])
+
   useEffect(() => {
     if (isOpen) {
       loadReport()
     }
-  }, [isOpen, reportType])
+  }, [isOpen, loadReport])
 
   useEffect(() => {
     const handleReportsGenerated = (event: CustomEvent) => {
@@ -52,21 +67,6 @@ export function ReportViewer({ isOpen, onClose, reportType, title }: ReportViewe
       window.removeEventListener('reportsGenerated', handleReportsGenerated as EventListener)
     }
   }, [reportType])
-
-  const loadReport = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const newReport = await generateReport(reportType, getCurrentFilter())
-      console.log('Loaded report:', newReport)
-      setReport(newReport)
-    } catch (error) {
-      console.error('Error loading report:', error)
-      setError(error instanceof Error ? error.message : 'Failed to load report')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (!isOpen) return null
 

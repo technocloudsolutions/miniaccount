@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useCallback } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { db, auth } from '@/lib/firebase';
@@ -44,34 +44,7 @@ export default function AddExpenseModal({ isOpen, onClose, onAdd, initialData }:
     }
   }, [initialData]);
 
-  useEffect(() => {
-    fetchCategories();
-    if (formData.paymentMethod === 'bank_transfer' || formData.paymentMethod === 'cheque') {
-      fetchBankAccounts();
-    }
-  }, [formData.paymentMethod]);
-
-  const fetchCategories = async () => {
-    try {
-      const userId = auth.currentUser?.uid;
-      if (!userId) return;
-
-      const categoriesRef = collection(db, 'expenseCategories');
-      const q = query(categoriesRef, where('userId', '==', userId));
-      const querySnapshot = await getDocs(q);
-
-      const fetchedCategories: ExpenseCategory[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedCategories.push({ id: doc.id, ...doc.data() } as ExpenseCategory);
-      });
-
-      setCategories(fetchedCategories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const fetchBankAccounts = async () => {
+  const fetchBankAccounts = useCallback(async () => {
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) return;
@@ -98,6 +71,33 @@ export default function AddExpenseModal({ isOpen, onClose, onAdd, initialData }:
       setBankAccounts(accounts);
     } catch (error) {
       console.error('Error fetching bank accounts:', error);
+    }
+  }, [formData.paymentMethod]);
+
+  useEffect(() => {
+    fetchCategories();
+    if (formData.paymentMethod === 'bank_transfer' || formData.paymentMethod === 'cheque') {
+      fetchBankAccounts();
+    }
+  }, [formData.paymentMethod, fetchBankAccounts]);
+
+  const fetchCategories = async () => {
+    try {
+      const userId = auth.currentUser?.uid;
+      if (!userId) return;
+
+      const categoriesRef = collection(db, 'expenseCategories');
+      const q = query(categoriesRef, where('userId', '==', userId));
+      const querySnapshot = await getDocs(q);
+
+      const fetchedCategories: ExpenseCategory[] = [];
+      querySnapshot.forEach((doc) => {
+        fetchedCategories.push({ id: doc.id, ...doc.data() } as ExpenseCategory);
+      });
+
+      setCategories(fetchedCategories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
   };
 

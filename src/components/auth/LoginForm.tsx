@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
@@ -28,21 +28,27 @@ export default function LoginForm() {
         router.push('/dashboard');
       }, 500);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
       
-      if (err.code === 'auth/invalid-email') {
-        setError('Invalid email address');
-      } else if (err.code === 'auth/user-disabled') {
-        setError('This account has been disabled');
-      } else if (err.code === 'auth/user-not-found') {
-        setError('No account found with this email');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Incorrect password');
-      } else if (err.code === 'auth/too-many-requests') {
-        setError('Too many failed attempts. Please try again later.');
+      if (err && typeof err === 'object' && 'code' in err) {
+        const firebaseError = err as AuthError;
+        
+        if (firebaseError.code === 'auth/invalid-email') {
+          setError('Invalid email address');
+        } else if (firebaseError.code === 'auth/user-disabled') {
+          setError('This account has been disabled');
+        } else if (firebaseError.code === 'auth/user-not-found') {
+          setError('No account found with this email');
+        } else if (firebaseError.code === 'auth/wrong-password') {
+          setError('Incorrect password');
+        } else if (firebaseError.code === 'auth/too-many-requests') {
+          setError('Too many failed attempts. Please try again later.');
+        } else {
+          setError('Failed to sign in. Please check your credentials.');
+        }
       } else {
-        setError('Failed to sign in. Please check your credentials.');
+        setError('An unexpected error occurred');
       }
     } finally {
       setLoading(false);

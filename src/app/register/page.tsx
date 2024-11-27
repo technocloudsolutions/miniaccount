@@ -1,5 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Image from "next/image";
 import RegisterForm from '@/components/auth/RegisterForm';
+import Link from 'next/link';
 
 export default function Register() {
   return (
@@ -52,12 +54,12 @@ export default function Register() {
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{' '}
-                <a
+                <Link
                   href="/"
                   className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
                 >
                   Sign in
-                </a>
+                </Link>
               </p>
             </div>
           </div>

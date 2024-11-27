@@ -1,6 +1,5 @@
 import DashboardNav from '@/components/layout/DashboardNav';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function DashboardLayout({
   children,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, AuthError } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { EnvelopeIcon, LockClosedIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
@@ -52,19 +52,24 @@ export default function RegisterForm() {
           formData.email,
           formData.password
         );
-      } catch (authError: any) {
-        if (authError.code === 'auth/email-already-in-use') {
-          throw new Error('An account with this email already exists');
-        } else if (authError.code === 'auth/invalid-email') {
-          throw new Error('Invalid email address');
-        } else if (authError.code === 'auth/operation-not-allowed') {
-          throw new Error('Email/password accounts are not enabled. Please contact support.');
-        } else if (authError.code === 'auth/weak-password') {
-          throw new Error('Password should be at least 6 characters');
-        } else {
-          console.error('Auth error:', authError);
-          throw new Error('Failed to create account. Please try again.');
+      } catch (authError: unknown) {
+        if (authError && typeof authError === 'object' && 'code' in authError) {
+          const firebaseError = authError as AuthError;
+          
+          if (firebaseError.code === 'auth/email-already-in-use') {
+            throw new Error('An account with this email already exists');
+          } else if (firebaseError.code === 'auth/invalid-email') {
+            throw new Error('Invalid email address');
+          } else if (firebaseError.code === 'auth/operation-not-allowed') {
+            throw new Error('Email/password accounts are not enabled. Please contact support.');
+          } else if (firebaseError.code === 'auth/weak-password') {
+            throw new Error('Password should be at least 6 characters');
+          } else {
+            console.error('Auth error:', firebaseError);
+            throw new Error('Failed to create account. Please try again.');
+          }
         }
+        throw new Error('An unexpected error occurred during registration');
       }
 
       const user = userCredential.user;
@@ -96,8 +101,8 @@ export default function RegisterForm() {
       // Registration successful
       router.push('/dashboard');
       
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       console.error('Registration error:', err);
     } finally {
       setLoading(false);

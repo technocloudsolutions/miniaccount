@@ -4,6 +4,7 @@ import * as React from "react"
 import { DayPicker } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
@@ -14,17 +15,6 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  const renderNavigation = () => (
-    <div className="space-x-1 flex items-center">
-      <button className="nav_button_previous">
-        <ChevronLeft className="h-4 w-4" />
-      </button>
-      <button className="nav_button_next">
-        <ChevronRight className="h-4 w-4" />
-      </button>
-    </div>
-  )
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}

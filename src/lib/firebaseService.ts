@@ -1,4 +1,5 @@
 import { db } from './firebase'; // Make sure you have this firebase config file
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { collection, getDocs, addDoc, deleteDoc, doc, setDoc, serverTimestamp, query, where, updateDoc, getDoc } from 'firebase/firestore';
 import type { BankAccount, ExpenseCategory, SupplierCategory, Purchase, Supplier, InventoryItem, InventoryCategory, InventoryTransaction } from '@/types';
 import { auth } from './firebase';

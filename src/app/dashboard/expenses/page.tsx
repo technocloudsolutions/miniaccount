@@ -43,24 +43,73 @@ export default function ExpensesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
-  const fetchExpenses = async () => {
-    if (!user) {
-      setError('User not authenticated');
-      setLoading(false);
-      return;
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      if (!user) {
+        setError('User not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const expensesRef = collection(db, 'transactions');
+        const q = query(
+          expensesRef,
+          where('userId', '==', user.uid),
+          where('type', '==', 'expense')
+        );
+
+        const querySnapshot = await getDocs(q);
+        const expensesData: Expense[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          expensesData.push({
+            id: doc.id,
+            amount: data.amount || 0,
+            paymentAmount: data.paymentAmount || 0,
+            description: data.description || '',
+            date: data.date || data.createdAt || new Date().toISOString(),
+            category: data.category || 'other',
+            paymentMethod: (data.paymentMethod || 'cash') as 'cash' | 'card' | 'bank_transfer' | 'credit' | 'cheque',
+            bankDetails: data.bankDetails,
+            billedDate: data.billedDate,
+            userId: data.userId,
+            createdAt: data.createdAt || new Date().toISOString(),
+            updatedAt: data.updatedAt || new Date().toISOString(),
+            type: 'expense',
+            currency: data.currency || 'LKR'
+          });
+        });
+
+        expensesData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setExpenses(expensesData);
+      } catch (err: unknown) {
+        console.error('Error fetching expenses:', err);
+        setError('Failed to load expenses data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchExpenses();
     }
+  }, [user]);
+
+  const refreshExpenses = async () => {
+    setLoading(true);
+    const expensesRef = collection(db, 'transactions');
+    const q = query(
+      expensesRef,
+      where('userId', '==', user?.uid),
+      where('type', '==', 'expense')
+    );
 
     try {
-      setLoading(true);
-      setError(null);
-
-      const expensesRef = collection(db, 'transactions');
-      const q = query(
-        expensesRef,
-        where('userId', '==', user.uid),
-        where('type', '==', 'expense')
-      );
-
       const querySnapshot = await getDocs(q);
       const expensesData: Expense[] = [];
       
@@ -84,23 +133,15 @@ export default function ExpensesPage() {
         });
       });
 
-      // Sort expenses by date
       expensesData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
       setExpenses(expensesData);
-    } catch (err: unknown) {
-      console.error('Error fetching expenses:', err);
-      setError('Failed to load expenses data');
+    } catch (err) {
+      console.error('Error refreshing expenses:', err);
+      setError('Failed to refresh expenses data');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      fetchExpenses();
-    }
-  }, [user, fetchExpenses]);
 
   const handleAddExpense = async (expenseData: Omit<Expense, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'type'>) => {
     if (!user) {
@@ -120,7 +161,7 @@ export default function ExpensesPage() {
       };
 
       await addDoc(collection(db, 'transactions'), transactionData);
-      await fetchExpenses();
+      await refreshExpenses();
       setIsModalOpen(false);
       setSelectedExpense(null);
     } catch (err) {
@@ -145,7 +186,7 @@ export default function ExpensesPage() {
       };
       
       await updateDoc(expenseRef, updateData);
-      await fetchExpenses();
+      await refreshExpenses();
       setIsModalOpen(false);
       setSelectedExpense(null);
     } catch (err) {
@@ -167,7 +208,7 @@ export default function ExpensesPage() {
     try {
       setError(null);
       await deleteDoc(doc(db, 'transactions', expenseId));
-      await fetchExpenses();
+      await refreshExpenses();
     } catch (err) {
       console.error('Error deleting expense:', err);
       setError('Failed to delete expense');

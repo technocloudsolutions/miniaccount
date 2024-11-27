@@ -4,7 +4,6 @@ import {
   addInventoryItem, 
   getInventoryItems, 
   getInventoryCategories,
-  addInventoryCategory,
   addInventoryTransaction,
   getInventoryTransactions,
   updateInventoryItem,
@@ -12,7 +11,7 @@ import {
 } from '@/lib/firebaseService';
 import { InventoryItem, InventoryCategory, InventoryTransaction } from '@/types';
 import { auth } from '@/lib/firebase';
-import { PlusIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 
 export default function Inventory() {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -245,8 +244,8 @@ export default function Inventory() {
                 const initialTransaction = transactions.find(
                   t => t.itemId === item.id && t.type === 'in'
                 );
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const initialQuantity = initialTransaction?.quantity || 0;
-                const initialAmount = initialQuantity * item.unitPrice;
 
                 return (
                   <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">

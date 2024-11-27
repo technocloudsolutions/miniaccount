@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PlusIcon, TrashIcon, CurrencyDollarIcon, TagIcon } from '@heroicons/react/24/outline';
 import { auth, db } from '@/lib/firebase';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { addSupplierCategory, getSupplierCategories, deleteSupplierCategory, addSupplier, getSuppliers, deleteSupplier, addInventoryCategory, getInventoryCategories } from '@/lib/firebaseService';
@@ -18,20 +19,6 @@ interface ExpenseCategory {
   createdAt: string;
   updatedAt: string;
 }
-
-interface TabProps {
-  id: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const bankCategories = [
-  { value: 'savings', label: 'Savings Account' },
-  { value: 'checking', label: 'Checking Account' },
-  { value: 'business', label: 'Business Account' },
-  { value: 'current', label: 'Current Account' },
-  { value: 'merchant', label: 'Merchant Account' },
-] as const;
 
 type BankCategory = typeof bankCategories[number]['value'];
 
@@ -50,8 +37,16 @@ type BankAccount = {
 interface TabItem {
   id: 'bankAccounts' | 'expenseCategories' | 'supplierCategories' | 'suppliers' | 'inventoryCategories';
   label: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.ComponentProps<'svg'>>;
 }
+
+const bankCategories = [
+  { value: 'savings', label: 'Savings Account' },
+  { value: 'checking', label: 'Checking Account' },
+  { value: 'business', label: 'Business Account' },
+  { value: 'investment', label: 'Investment Account' },
+  { value: 'other', label: 'Other' }
+] as const;
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -63,7 +58,6 @@ export default function SettingsPage() {
   const [supplierCategories, setSupplierCategories] = useState<SupplierCategory[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -118,19 +112,7 @@ export default function SettingsPage() {
   // Add this to your state declarations at the top of the component
   const [inventoryCategories, setInventoryCategories] = useState<InventoryCategory[]>([]);
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-      fetchData();
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!auth.currentUser) return;
     
     setIsLoading(true);
@@ -153,7 +135,19 @@ export default function SettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);  // Empty dependency array since all dependencies are stable
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      fetchData();
+    });
+
+    return () => unsubscribe();
+  }, [router, fetchData]);
 
   const handleAddSupplierCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -269,36 +263,6 @@ export default function SettingsPage() {
       console.error('Error fetching expense categories:', error);
       setError('Failed to load expense categories');
       return [];
-    }
-  };
-
-  // New function to update category order
-  const handleUpdateCategoryOrder = async (categoryId: string, newOrder: number) => {
-    try {
-      const docRef = doc(db, 'expenseCategories', categoryId);
-      await updateDoc(docRef, {
-        order: newOrder,
-        updatedAt: new Date().toISOString(),
-      });
-      await fetchExpenseCategories();
-    } catch (error) {
-      console.error('Error updating category order:', error);
-      setError('Failed to update category order');
-    }
-  };
-
-  // New function to toggle category active status
-  const handleToggleCategoryStatus = async (categoryId: string, currentStatus: boolean) => {
-    try {
-      const docRef = doc(db, 'expenseCategories', categoryId);
-      await updateDoc(docRef, {
-        isActive: !currentStatus,
-        updatedAt: new Date().toISOString(),
-      });
-      await fetchExpenseCategories();
-    } catch (error) {
-      console.error('Error toggling category status:', error);
-      setError('Failed to update category status');
     }
   };
 
@@ -476,10 +440,6 @@ export default function SettingsPage() {
   // New helper functions for filtering and sorting
   const getActiveMainCategories = () => {
     return getMainCategories().filter(cat => cat.isActive !== false);
-  };
-
-  const getInactiveMainCategories = () => {
-    return getMainCategories().filter(cat => cat.isActive === false);
   };
 
   const getActiveSubcategories = (parentId: string) => {

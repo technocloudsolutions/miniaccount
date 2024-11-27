@@ -10,13 +10,11 @@ import {
   CurrencyDollarIcon,
   ReceiptRefundIcon,
   ChartBarIcon,
-  UserCircleIcon,
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   ShoppingBagIcon,
   CubeIcon,
 } from '@heroicons/react/24/outline';
-import { BarChart3 } from "lucide-react"
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },

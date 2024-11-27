@@ -3,8 +3,18 @@
 import { useState } from 'react';
 import { initializeDatabase, checkDatabaseStructure } from '@/lib/initializeDatabase';
 
+// Define interface for status state
+interface StatusState {
+  success?: boolean;
+  error?: unknown;
+  timestamp?: string;
+  tables?: Record<string, unknown>;
+  message?: string;
+  [key: string]: unknown; // Allow for additional properties
+}
+
 export default function DatabaseManagement() {
-  const [status, setStatus] = useState<any>(null);
+  const [status, setStatus] = useState<StatusState | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleInitialize = async () => {

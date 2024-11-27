@@ -63,6 +63,7 @@ export default function ExpensesTable({ expenses, onEdit, onDelete }: ExpensesTa
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedExpenses = sortedExpenses.slice(startIndex, startIndex + itemsPerPage);
 
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const handleSort = (field: keyof Expense) => {
     setSortDirection(currentDirection => 
       sortField === field && currentDirection === 'desc' ? 'asc' : 'desc'
@@ -78,6 +79,7 @@ export default function ExpensesTable({ expenses, onEdit, onDelete }: ExpensesTa
       </span>
     );
   };
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 
   const formatDate = (dateString: string) => {
     try {

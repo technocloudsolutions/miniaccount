@@ -57,7 +57,7 @@ export default function ExpensesCharts({ expenses }: ExpensesChartsProps) {
   };
 
   // Calculate max value for chart scaling
-  const maxMonthlyTotal = Math.max(...monthlyData.map(([_, data]) => data.total));
+  const maxMonthlyTotal = Math.max(...monthlyData.map(([, data]) => data.total));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
