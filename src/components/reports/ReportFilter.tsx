@@ -68,7 +68,7 @@ export function ReportFilter() {
         detail: reports 
       })
       window.dispatchEvent(event)
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error generating reports:', error)
     } finally {
       setLoading(false)

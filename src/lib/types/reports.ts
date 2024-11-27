@@ -44,6 +44,22 @@ export interface ReportDataPoint {
   };
 }
 
+export interface ReportMetadata {
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+}
+
+export interface ReportData extends ReportMetadata {
+  id: string;
+  type: ReportType;
+  data: Record<string, unknown>;
+  period: {
+    start: string;
+    end: string;
+  };
+}
+
 export interface Report {
   id: string;
   type: ReportType;

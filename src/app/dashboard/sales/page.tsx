@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { PlusIcon } from '@heroicons/react/24/outline';
@@ -20,7 +20,7 @@ export default function SalesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
-  const fetchSales = async () => {
+  const fetchSales = useCallback(async () => {
     if (!user) {
       setError('User not authenticated');
       setLoading(false);
@@ -66,19 +66,19 @@ export default function SalesPage() {
       salesData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       console.log('Processed sales data:', salesData);
       setSales(salesData);
-    } catch (err: any) {
-      console.error('Error fetching sales:', err);
+    } catch (error: unknown) {
+      console.error('Error fetching sales:', error);
       setError('Failed to load sales data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       fetchSales();
     }
-  }, [user]);
+  }, [user, fetchSales]);
 
   const handleAddSale = async (saleData: Omit<Sale, 'id' | 'userId'>) => {
     if (!user) {
