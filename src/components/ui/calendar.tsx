@@ -14,6 +14,17 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const renderNavigation = () => (
+    <div className="space-x-1 flex items-center">
+      <button className="nav_button_previous">
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button className="nav_button_next">
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  )
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
