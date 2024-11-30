@@ -88,7 +88,18 @@ export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: Sales
       .join(' ');
   };
 
-  // Add filter controls above the table
+  // Move getPaymentMethodDisplay before any JSX
+  const getPaymentMethodDisplay = (method: Sale['paymentMethod']) => {
+    const displays = {
+      cash: 'Cash',
+      card: 'Card',
+      bank_transfer: 'Bank Transfer',
+      credit: 'Credit',
+      cheque: 'Cheque'
+    };
+    return displays[method] || method;
+  };
+
   const FilterControls = () => (
     <div className="mb-4 space-y-2 sm:space-y-0 sm:flex sm:space-x-4 items-end">
       <div className="flex-1">
@@ -117,6 +128,7 @@ export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: Sales
           <option value="cash">Cash</option>
           <option value="card">Card</option>
           <option value="bank_transfer">Bank Transfer</option>
+          <option value="credit">Credit</option>
           <option value="cheque">Cheque</option>
         </select>
       </div>
@@ -325,6 +337,9 @@ export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: Sales
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Unit Price
                 </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Payment Method
+                </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Total Amount
                 </th>
@@ -351,6 +366,9 @@ export default function SalesTable({ sales, onEdit, onDelete, onInvoice }: Sales
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
                       {formatCurrency(sale.unitPrice)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                      {getPaymentMethodDisplay(sale.paymentMethod)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 dark:text-green-400 font-medium">
                       {formatCurrency(sale.amount)}

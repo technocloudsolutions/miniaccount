@@ -13,12 +13,13 @@ import {
 
 interface Transaction {
   id: string;
-  type: 'sale' | 'expense';
+  type: 'sale' | 'expense' | 'purchase';
   amount: number;
   description: string;
   date: string;
   customer?: string;
   category?: string;
+  userId: string;
 }
 
 export default function Dashboard() {
@@ -26,11 +27,14 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     totalSales: 0,
     totalExpenses: 0,
+    totalPurchases: 0,
     netProfit: 0,
     todaySales: 0,
     todayExpenses: 0,
+    todayPurchases: 0,
     monthSales: 0,
     monthExpenses: 0,
+    monthPurchases: 0,
   });
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +46,12 @@ export default function Dashboard() {
       currency: 'LKR',
       minimumFractionDigits: 2
     });
+  };
+
+  const isSameDay = (date1: Date, date2: Date) => {
+    return date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate();
   };
 
   useEffect(() => {
@@ -57,51 +67,102 @@ export default function Dashboard() {
         
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         
-        // Fetch all transactions
-        const transactionsRef = collection(db, 'transactions');
-        const q = query(
-          transactionsRef,
-          where('userId', '==', user.uid)
-        );
-
-        const querySnapshot = await getDocs(q);
-        const transactions: Transaction[] = [];
+        // Initialize stats
         const totalStats = {
           totalSales: 0,
           totalExpenses: 0,
+          totalPurchases: 0,
           todaySales: 0,
           todayExpenses: 0,
+          todayPurchases: 0,
           monthSales: 0,
           monthExpenses: 0,
+          monthPurchases: 0,
         };
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as Transaction;
-          transactions.push({ ...data, id: doc.id });
-          
-          const transactionDate = new Date(data.date);
-          const amount = data.amount || 0;
+        const transactions: Transaction[] = [];
 
-          if (data.type === 'sale') {
+        // Fetch transactions
+        const transactionsRef = collection(db, 'transactions');
+        const transactionsQuery = query(
+          transactionsRef,
+          where('userId', '==', user.uid)
+        );
+        const transactionsSnapshot = await getDocs(transactionsQuery);
+
+        // Process transactions
+        transactionsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const transactionDate = new Date(data.date);
+          transactionDate.setHours(0, 0, 0, 0);
+          const amount = data.amount || 0;
+          const transactionType = (data.type || '').toLowerCase().trim();
+
+          transactions.push({
+            id: doc.id,
+            type: transactionType as 'sale' | 'expense' | 'purchase',
+            amount: amount,
+            description: data.description || '',
+            date: data.date,
+            customer: data.customer,
+            category: data.category,
+            userId: data.userId
+          } as Transaction);
+
+          if (transactionType === 'sale' || transactionType === 'sales') {
             totalStats.totalSales += amount;
-            if (transactionDate >= today) {
+            if (isSameDay(transactionDate, today)) {
               totalStats.todaySales += amount;
             }
             if (transactionDate >= firstDayOfMonth) {
               totalStats.monthSales += amount;
             }
-          } else {
-            totalStats.totalExpenses += amount;
-            if (transactionDate >= today) {
+          } else if (transactionType === 'expense' || transactionType === 'expenses') {
+            if (isSameDay(transactionDate, today)) {
               totalStats.todayExpenses += amount;
             }
             if (transactionDate >= firstDayOfMonth) {
               totalStats.monthExpenses += amount;
             }
+            totalStats.totalExpenses += amount;
           }
         });
 
-        // Sort transactions by date and limit to 10 most recent
+        // Fetch purchases
+        const purchasesRef = collection(db, 'purchases');
+        const purchasesQuery = query(
+          purchasesRef,
+          where('userId', '==', user.uid)
+        );
+        const purchasesSnapshot = await getDocs(purchasesQuery);
+
+        // Process purchases
+        purchasesSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const purchaseDate = new Date(data.purchaseDate);
+          purchaseDate.setHours(0, 0, 0, 0);
+          const amount = data.amount || 0;
+
+          transactions.push({ 
+            ...data, 
+            id: doc.id,
+            type: 'purchase',
+            date: data.purchaseDate,
+            amount: amount,
+            description: data.description || '',
+            userId: data.userId
+          } as Transaction);
+
+          if (isSameDay(purchaseDate, today)) {
+            totalStats.todayPurchases += amount;
+          }
+          if (purchaseDate >= firstDayOfMonth) {
+            totalStats.monthPurchases += amount;
+          }
+          totalStats.totalPurchases += amount;
+        });
+
+        // Sort and set transactions
         const sortedTransactions = transactions
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 10);
@@ -109,8 +170,9 @@ export default function Dashboard() {
         setRecentTransactions(sortedTransactions);
         setStats({
           ...totalStats,
-          netProfit: totalStats.totalSales - totalStats.totalExpenses,
+          netProfit: totalStats.totalSales - (totalStats.totalPurchases + totalStats.totalExpenses),
         });
+
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to load dashboard data');
@@ -156,6 +218,12 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600 dark:text-gray-300">Purchases</span>
+              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                {formatCurrency(stats.todayPurchases)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600 dark:text-gray-300">Expenses</span>
               <span className="text-sm font-medium text-red-600 dark:text-red-400">
                 {formatCurrency(stats.todayExpenses)}
@@ -178,6 +246,12 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600 dark:text-gray-300">Purchases</span>
+              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                {formatCurrency(stats.monthPurchases)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600 dark:text-gray-300">Expenses</span>
               <span className="text-sm font-medium text-red-600 dark:text-red-400">
                 {formatCurrency(stats.monthExpenses)}
@@ -194,14 +268,34 @@ export default function Dashboard() {
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600 dark:text-gray-300">Net Profit</span>
-              <span className={`text-lg font-semibold ${
-                stats.netProfit >= 0 
-                  ? 'text-green-600 dark:text-green-400' 
-                  : 'text-red-600 dark:text-red-400'
-              }`}>
-                {formatCurrency(stats.netProfit)}
+              <span className="text-sm text-gray-600 dark:text-gray-300">Total Sales</span>
+              <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                {formatCurrency(stats.totalSales)}
               </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600 dark:text-gray-300">Total Purchases</span>
+              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                {formatCurrency(stats.totalPurchases)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600 dark:text-gray-300">Total Expenses</span>
+              <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                {formatCurrency(stats.totalExpenses)}
+              </span>
+            </div>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Net Profit</span>
+                <span className={`text-lg font-semibold ${
+                  stats.netProfit >= 0 
+                    ? 'text-green-600 dark:text-green-400' 
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatCurrency(stats.netProfit)}
+                </span>
+              </div>
             </div>
           </div>
         </div>

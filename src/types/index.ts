@@ -153,7 +153,7 @@ export type Sale = {
   quantity: number;
   unitPrice: number;
   amount: number;
-  paymentMethod: 'cash' | 'card' | 'bank' | 'cheque';
+  paymentMethod: 'cash' | 'card' | 'bank_transfer' | 'credit' | 'cheque';
   bankAccountId?: string;
   status: 'completed' | 'pending' | 'cancelled';
   notes?: string;
@@ -162,3 +162,5 @@ export type Sale = {
   createdAt: any;
   updatedAt: any;
 }
+
+export type PaymentMethod = 'cash' | 'card' | 'bank_transfer' | 'credit' | 'cheque';

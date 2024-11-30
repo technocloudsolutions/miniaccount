@@ -1,10 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Sale } from '@/types';
+import { Sale, BankAccount, PaymentMethod } from '@/types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { formatCurrency } from '@/utils/format';
 import { getBankAccounts } from '@/lib/firebaseService';
-import type { BankAccount } from '@/types';
 
 interface AddSaleModalProps {
   isOpen: boolean;
@@ -29,7 +28,7 @@ export default function AddSaleModal({ isOpen, onClose, onAdd, initialData }: Ad
   });
 
   useEffect(() => {
-    if (formData.paymentMethod === 'bank') {
+    if (formData.paymentMethod === 'bank_transfer') {
       loadBankAccounts();
     }
   }, [formData.paymentMethod]);
@@ -173,18 +172,19 @@ export default function AddSaleModal({ isOpen, onClose, onAdd, initialData }: Ad
             </label>
             <select
               value={formData.paymentMethod}
-              onChange={(e) => setFormData({...formData, paymentMethod: e.target.value as Sale['paymentMethod']})}
+              onChange={(e) => setFormData({...formData, paymentMethod: e.target.value as PaymentMethod})}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
               required
             >
               <option value="cash">Cash</option>
               <option value="card">Card</option>
-              <option value="bank">Bank Transfer</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="credit">Credit</option>
               <option value="cheque">Cheque</option>
             </select>
           </div>
 
-          {formData.paymentMethod === 'bank' && (
+          {formData.paymentMethod === 'bank_transfer' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Bank Account
